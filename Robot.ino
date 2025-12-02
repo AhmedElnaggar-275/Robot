@@ -1,6 +1,6 @@
 void setup()
 {
-    // clean code is our duty
+    Serial.begin(9600);
 }
 
 void loop()

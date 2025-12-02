@@ -3,15 +3,17 @@
 
 /*******************setup functions*********************/
 
-void leg1_setup(short pin);
-void leg2_setup(short pin);
-void ultrsnc_head_setup(short echoin , short trigout);
+void leg1_setup(int pin);
+void leg2_setup(int pin);
+void ultrsnc_head_setup(int echo1 , int trig1);
 
 /********************Operation functions*****************/
 void robot_init();
-void leg1_angle(short ang);
-void leg2_angle(short ang);
-float ultrsnc_head(short echo , short trig);
-void move_2_steps();
+void leg1(int servo_state);
+void leg2(int servo_state);
+float ultrsnc_head();
+void leg_act(int leg , int servo_state);
+void move_2_steps(int t_delayms);
+void rotate_1_step(int leg , int t_delayms);
 
 #endif
