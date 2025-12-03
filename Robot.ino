@@ -1,6 +1,7 @@
 #include "Robot.h"
 
 int distance = 0 ;
+
 void setup()
 {
     leg1_setup(9);        // right leg servo connected to pin 9
