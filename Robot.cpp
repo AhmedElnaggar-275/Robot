@@ -11,9 +11,6 @@ Servo leg1;
 Servo leg2;
 bool leg1_attached = false;
 bool leg2_attached = false;
-const int move = 180 ;
-const int stop = 90 ;
-const int reverse = 0 ;
 
 // serial monitor
 Serial.begin(9600);
@@ -45,8 +42,8 @@ void ultrsnc_head_setup(int echo1 , int trig1)
 void robot_init()                         // robot initialization
 {
 
-    leg_act(RIGHT_LEG,stop);
-    leg_act(LEFT_LEG,stop);
+    leg_act(RIGHT_LEG,STOP);
+    leg_act(LEFT_LEG,STOP);
 
 }
 
@@ -63,7 +60,7 @@ float read_distance()
     to send the echo signal**/
     digitalWrite(trig , LOW);
     duration = pulseIn(echo , HIGH);      // Echo pin is high until receiving the pulse again
-    distance = (duration * 0.034321) / 2.0 ;       // distance calculation (cm)
+    distance = (duration * 0.0343) / 2.0 ;       // distance calculation (cm)
     Serial.println(distance);
     return distance ;
 }
@@ -81,37 +78,37 @@ void leg_act(int leg , int servo_state)    // 1 for right leg , 2 for left leg
     }
 }
 
-void move_2_steps(int t_delayms)                   // used inside a loop
+void MOVE_2_steps(unsigned int t_delayms)                   // used inside a loop
 {
     if (leg1_attached == false || leg2_attached == false)
     {
         Serial.println("Error: One or both legs are not attached.");
         return ;
     }
-    leg_act(1 , stop);        // insuring stabiliy before moving
-    leg_act(2 , stop);
+    
+    robot_init();        // insuring stabiliy before moving
 
-    leg_act(1 , move);
+    leg_act(RIGHT_LEG , MOVE);
     delay(t_delayms);
-    leg_act(1 , stop);
+    leg_act(RIGHT_LEG , STOP);
     delay(t_delayms);
-    leg_act(2 , move);
+    leg_act(LEFT_LEG , MOVE);
     delay(t_delayms);
-    leg_act(2 , stop);
+    leg_act(LEFT_LEG , STOP);
     delay(t_delayms);
 }
-void rotate_1_step(int leg , int t_delayms)    // used inside a loop
+void rotate_1_step(int leg , unsigned int t_delayms)    // used inside a loop
 {
-    leg_act(leg , stop);     // insuring stabiliy before moving
+    leg_act(leg , STOP);     // insuring stabiliy before moving
     if (leg == RIGHT_LEG)
     {
-        leg_act(RIGHT_LEG , stop);
+        leg_act(RIGHT_LEG , STOP);
     }
     else if (leg == LEFT_LEG)
     {
-        leg_act(LEFT_LEG , stop);
+        leg_act(LEFT_LEG , STOP);
     }
-    leg_act(leg , move);
+    leg_act(leg , MOVE);
     delay(t_delayms);
-    leg_act(leg , stop);
+    leg_act(leg , STOP);
 }
