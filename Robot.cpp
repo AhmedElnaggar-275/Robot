@@ -78,7 +78,7 @@ void leg_act(int leg , int servo_state)    // 1 for right leg , 2 for left leg
     }
 }
 
-void MOVE_2_steps(unsigned int t_delayms)                   // used inside a loop
+void move_2_steps(unsigned int t_delayms)        // used inside a loop
 {
     if (leg1_attached == false || leg2_attached == false)
     {
