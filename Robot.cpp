@@ -17,13 +17,13 @@ Serial.begin(9600);
 
 /***********************Setup Functions************************************************/
 
-void leg1_setup(int pin)         // right leg
+void R_leg_setup(int pin)         // right leg
 {
     leg1.attach(pin);
     leg1_attached = true;
 }
 
-void leg2_setup(int pin)         // left leg
+void L_leg_setup(int pin)         // left leg
 {
     leg2.attach(pin);
     leg2_attached = true;

@@ -8,8 +8,8 @@
 
 /*******************setup functions*********************/
 
-void leg1_setup(int pin);
-void leg2_setup(int pin);
+void R_leg_setup(int pin);
+void L_leg_setup(int pin);
 void ultrsnc_head_setup(int echo1 , int trig1);
 
 /********************Operation functions*****************/

@@ -4,8 +4,8 @@ int distance = 0 ;
 
 void setup()
 {
-    leg1_setup(9);        // right leg servo connected to pin 9
-    leg2_setup(10);       // left leg servo connected to pin 10
+    R_leg_setup(9);        // right leg servo connected to pin 9
+    L_leg_setup(10);       // left leg servo connected to pin 10
     ultrsnc_head_setup(7 , 6);   // ultrasonic sensor echo pin connected to pin 7 , trig pin connected to pin 6
     robot_init();
 }
