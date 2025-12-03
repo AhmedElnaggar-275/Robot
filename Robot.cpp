@@ -45,8 +45,8 @@ void ultrsnc_head_setup(int echo1 , int trig1)
 void robot_init()                         // robot initialization
 {
 
-    leg_act(1,stop);
-    leg_act(2,stop);
+    leg_act(RIGHT_LEG,stop);
+    leg_act(LEFT_LEG,stop);
 
 }
 
@@ -71,11 +71,11 @@ float read_distance()
 
 void leg_act(int leg , int servo_state)    // 1 for right leg , 2 for left leg
 {
-    if (leg == 1) 
+    if (leg == RIGHT_LEG) 
     {
         leg1.write(servo_state);
     } 
-    else if (leg == 2)
+    else if (leg == LEFT_LEG)
     {
         leg2.write(servo_state);
     }
@@ -103,13 +103,13 @@ void move_2_steps(int t_delayms)                   // used inside a loop
 void rotate_1_step(int leg , int t_delayms)    // used inside a loop
 {
     leg_act(leg , stop);     // insuring stabiliy before moving
-    if (leg == 1)
+    if (leg == RIGHT_LEG)
     {
-        leg_act(2 , stop);
+        leg_act(RIGHT_LEG , stop);
     }
-    else if (leg == 2)
+    else if (leg == LEFT_LEG)
     {
-        leg_act(1 , stop);
+        leg_act(LEFT_LEG , stop);
     }
     leg_act(leg , move);
     delay(t_delayms);
