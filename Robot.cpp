@@ -15,6 +15,9 @@ const int move = 180 ;
 const int stop = 90 ;
 const int reverse = 0 ;
 
+// serial monitor
+Serial.begin(9600);
+
 /***********************Setup Functions************************************************/
 
 void leg1_setup(int pin)         // right leg
@@ -42,25 +45,13 @@ void ultrsnc_head_setup(int echo1 , int trig1)
 void robot_init()                         // robot initialization
 {
 
-    leg1_angle(stop);
-    leg2_angle(stop);
+    leg_act(1,stop);
+    leg_act(2,stop);
 
 }
 
-void leg1_angle(int servo_state)         // right leg
-{
-    if (leg1_attached) leg1.write(servo_state);
-    else Serial.println("Leg 1 not attached!");
-}
 
-void leg2_angle(int servo_state)        // left leg
-{
-    if (leg2_attached) leg2.write(servo_state); 
-    else Serial.println("Leg 2 not attached!");
-}
-
-
-float ultrsnc_head()
+float read_distance()
 {
     float distance = 0 ;
     unsigned long duration = 0 ;
@@ -92,6 +83,11 @@ void leg_act(int leg , int servo_state)    // 1 for right leg , 2 for left leg
 
 void move_2_steps(int t_delayms)                   // used inside a loop
 {
+    if (leg1_attached == false || leg2_attached == false)
+    {
+        Serial.println("Error: One or both legs are not attached.");
+        return ;
+    }
     leg_act(1 , stop);        // insuring stabiliy before moving
     leg_act(2 , stop);
 
@@ -107,7 +103,14 @@ void move_2_steps(int t_delayms)                   // used inside a loop
 void rotate_1_step(int leg , int t_delayms)    // used inside a loop
 {
     leg_act(leg , stop);     // insuring stabiliy before moving
-
+    if (leg == 1)
+    {
+        leg_act(2 , stop);
+    }
+    else if (leg == 2)
+    {
+        leg_act(1 , stop);
+    }
     leg_act(leg , move);
     delay(t_delayms);
     leg_act(leg , stop);
