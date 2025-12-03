@@ -14,7 +14,7 @@ void ultrsnc_head_setup(int echo1 , int trig1);
 
 /********************Operation functions*****************/
 void robot_init();             // robot initialization
-float read_distance();        // Ultrasonic distance reading
+float read_distance();        // ultrasonic distance reading
 
 void leg_act(int leg , int servo_state);     // leg = RIGHT_LEG or LEFT_LEG
                                              // servo_state = MOVE , STOP or REV
