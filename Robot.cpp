@@ -9,24 +9,21 @@ int trig = 0 ;
 // servos
 Servo leg1;
 Servo leg2;
-bool leg1_attached = false;
-bool leg2_attached = false;
+bool leg_attached[] = {1,false, false}; // leg_attach[1] for right leg, leg_attach[2] for left leg
 
-// serial monitor
-Serial.begin(9600);
 
 /***********************Setup Functions************************************************/
 
 void R_leg_setup(int pin)         // right leg
 {
     leg1.attach(pin);
-    leg1_attached = true;
+    leg_attached[RIGHT_LEG] = true;
 }
 
 void L_leg_setup(int pin)         // left leg
 {
     leg2.attach(pin);
-    leg2_attached = true;
+    leg_attached[LEFT_LEG] = true;
 }
 
 void ultrsnc_head_setup(int echo1 , int trig1)
@@ -80,9 +77,14 @@ void leg_act(int leg , int servo_state)    // 1 for right leg , 2 for left leg
 
 void move_2_steps(unsigned int t_delayms)        // used inside a loop
 {
-    if (leg1_attached == false || leg2_attached == false)
+    if (leg_attached[RIGHT_LEG] == false)
     {
-        Serial.println("Error: One or both legs are not attached.");
+        Serial.println("Error: Right leg is not attached.");
+        return ;
+    }
+    if (leg_attached[LEFT_LEG] == false)
+    {
+        Serial.println("Error: Left leg is not attached.");
         return ;
     }
     
@@ -99,16 +101,14 @@ void move_2_steps(unsigned int t_delayms)        // used inside a loop
 }
 void rotate_1_step(int leg , unsigned int t_delayms)    // used inside a loop
 {
-    leg_act(leg , STOP);     // insuring stabiliy before moving
-    if (leg == RIGHT_LEG)
+    if (leg_attached[leg] == false)
     {
-        leg_act(RIGHT_LEG , STOP);
+        Serial.println("Error: The specified leg to rotate is not attached.");
+        return ;
     }
-    else if (leg == LEFT_LEG)
-    {
-        leg_act(LEFT_LEG , STOP);
-    }
+    robot_init();        // insuring stabiliy before rotating
     leg_act(leg , MOVE);
     delay(t_delayms);
     leg_act(leg , STOP);
+    delay(t_delayms);
 }
