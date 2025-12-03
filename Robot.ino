@@ -1,3 +1,5 @@
+#include "Robot.h"
+
 int distance = 0 ;
 void setup()
 {
