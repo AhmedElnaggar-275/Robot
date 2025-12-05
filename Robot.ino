@@ -29,6 +29,7 @@ void loop()
     {
         distance = read_distance();
     }
+    delay(2000);
     while(distance >= 10)   // move while distance is more than 10 cm
     {
         move_2_steps(500);   // moving the robot 2 steps with delay of 500 milliseconds between steps

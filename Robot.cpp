@@ -9,7 +9,7 @@ int trig = 0 ;
 // servos
 Servo leg1;
 Servo leg2;
-bool leg_attached[] = {1,false, false}; // leg_attach[1] for right leg, leg_attach[2] for left leg
+bool leg_attached[] = {0,false, false}; // leg_attach[1] for right leg, leg_attach[2] for left leg
 
 
 /***********************Setup Functions************************************************/
