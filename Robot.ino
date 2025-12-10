@@ -13,7 +13,7 @@ void setup()
 
 void loop()
 {
-     while(distance < 10)
+     while(distance < 10)        // at the beginning distance = 0 and therefore this is the first loop the program will execute
     {
         distance = read_distance();
     }

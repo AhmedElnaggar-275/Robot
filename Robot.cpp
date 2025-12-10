@@ -58,7 +58,6 @@ float read_distance()
     digitalWrite(trig , LOW);
     duration = pulseIn(echo , HIGH);      // Echo pin is high until receiving the pulse again
     distance = (duration * 0.0343) / 2.0 ;       // distance calculation (cm)
-    Serial.println(distance);
     return distance ;
 }
 
