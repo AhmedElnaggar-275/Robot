@@ -66,7 +66,7 @@ float read_distance()
 }
 
 
-void leg_act(int leg , int servo_action)    // 0 for right leg , 1 for left leg
+void leg_act(int leg , int servo_action)
 {
     if (leg == RIGHT_LEG) 
     {
@@ -95,7 +95,6 @@ void move_2_steps(unsigned int t_delayms)        // used inside a loop
                               // this is due to the delay control at the beginning of the function😉
     {
         case LEFT_STOP:                  // initial state or state after completing a full cycle
-            robot_init();        // insuring stabiliy before moving
             leg_act(RIGHT_LEG , MOVE_R);
             state = RIGHT_MOVING ;       // state is RIGHT_MOVING until the next function call
             break;
@@ -131,7 +130,6 @@ void rotate_1_step(int leg , unsigned int t_delayms)    // used inside a loop
                               // this is due to the delay control at the beginning of the function😉
     {
         case LEG_STOP:
-            robot_init();        // insuring stabiliy before moving
             leg_act(leg ,(leg == RIGHT_LEG) ? MOVE_R : MOVE_L);   // ternary operator to choose the correct move macro based on the leg to be moved
             state = LEG_MOVING ;
             break;

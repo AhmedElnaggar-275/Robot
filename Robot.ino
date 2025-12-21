@@ -1,6 +1,7 @@
 #include "Robot.h"
 
 char currentCmd = 0;
+bool stopped = false;
 
 void setup()
 {
@@ -11,7 +12,7 @@ void setup()
   Serial.begin(115200);
 }
 void loop() {
-  // --- Read command (non-blocking) ---
+
   if (Serial.available() > 0)   // Check if data is available to read
   {
     int in = Serial.read();     // Read as int to check for -1 (no data)
@@ -39,22 +40,28 @@ void loop() {
 
     case 'F':
       move_2_steps(500);
+      stopped = false;
       break;
 
     case 'L':
       rotate_1_step(RIGHT_LEG, 500);
+      stopped = false;
       break;
 
     case 'R':
       rotate_1_step(LEFT_LEG, 500);
+      stopped = false;
       break;
 
     case 'S':
-      // Stop command - do nothing
+      if(!stopped){
+      robot_init();
+      stopped = true;
+      }
       break;
-    default:
-      robot_init();  // If no valid command, stop the robot(initialize)
-      currrentCmd = 'S';
+
+    default:   // Invalid command - stop the robot
+      currentCmd = 'S';
       break;
   }
 }
