@@ -3,13 +3,12 @@
 #include <Servo.h>
 
 // ultrasonic head pins
-int echo = 0 ;
+int echo = 0 ;       // defined globally to be used in read_distance function easily without passing them as parameters
 int trig = 0 ;
 
 // servos
 Servo leg1;
 Servo leg2;
-bool leg_attached[] = {false, false}; // leg_attach[0] for right leg, leg_attach[1] for left leg
 
 
 /***********************Setup Functions************************************************/
@@ -17,13 +16,11 @@ bool leg_attached[] = {false, false}; // leg_attach[0] for right leg, leg_attach
 void R_leg_setup(int pin)         // right leg
 {
     leg1.attach(pin);
-    leg_attached[RIGHT_LEG] = true;
 }
 
 void L_leg_setup(int pin)         // left leg
 {
     leg2.attach(pin);
-    leg_attached[LEFT_LEG] = true;
 }
 
 void ultrsnc_head_setup(int echo1 , int trig1)
@@ -39,8 +36,8 @@ void ultrsnc_head_setup(int echo1 , int trig1)
 void robot_init()                         // robot initialization
 {
 
-    leg_act(RIGHT_LEG,STOP);
-    leg_act(LEFT_LEG,STOP);
+    leg_act(RIGHT_LEG, STOP);
+    leg_act(LEFT_LEG, STOP);
 
 }
 
@@ -56,9 +53,9 @@ float read_distance()
     /**triggering pulse for 10 microseconds
     to send the echo signal**/
     digitalWrite(trig , LOW);
-    duration = pulseIn(echo, HIGH, 25000UL);
-    // Echo pin is high until receiving the pulse again or after timeout of 25 milliseconds (25000 microseconds)
-    // in other words it can't read distance more than approximately 4.3 meters (speed of sound is 343 m/s)
+    duration = pulseIn(echo, HIGH, 2332UL);
+    // Echo pin is high until receiving the pulse again or after timeout of 2332 microseconds
+    // in other words it can't read distance more than approximately 40 cm (speed of sound is 343 m/s)
     if (duration == 0)
     {
         return -1 ;   // timeout occurred , no obstacle detected within range
@@ -82,18 +79,7 @@ void leg_act(int leg , int servo_action)    // 0 for right leg , 1 for left leg
 }
 
 void move_2_steps(unsigned int t_delayms)        // used inside a loop
-{
-    if (leg_attached[RIGHT_LEG] == false)
-    {
-        Serial.println("Error: Right leg is not attached.");
-        return ;
-    }
-    if (leg_attached[LEFT_LEG] == false)
-    {
-        Serial.println("Error: Left leg is not attached.");
-        return ;
-    }
-    
+{   
    static WalkState state = LEFT_STOP ;   // static variable to hold the current state without reseting it on each function call
    static unsigned long last_time = 0;   // static to hold its value without reseting it on each function call
    unsigned long now = millis();        //returns the time elapsed since the program started (milliseconds time)
@@ -105,7 +91,7 @@ void move_2_steps(unsigned int t_delayms)        // used inside a loop
     last_time = now ;           // to handle continuous increment of millis()
 
     switch (state)             // finite state machine
-                              // finishes one step(state) at each fucntion call and each function call is delayed by t_delayms after the previous one
+                              // finishes one state at each fucntion call and each function call is delayed by t_delayms after the previous one
                               // this is due to the delay control at the beginning of the function😉
     {
         case LEFT_STOP:                  // initial state or state after completing a full cycle
@@ -132,11 +118,6 @@ void move_2_steps(unsigned int t_delayms)        // used inside a loop
 }
 void rotate_1_step(int leg , unsigned int t_delayms)    // used inside a loop
 {
-    if (leg_attached[leg] == false)
-    {
-        Serial.println("Error: The specified leg to rotate is not attached.");
-        return ;
-    }
     static RotateState state = LEG_STOP ;   // static variable to hold the current state without reseting it on each function call
     static unsigned long last_time = 0;
     unsigned long now = millis();
@@ -146,7 +127,7 @@ void rotate_1_step(int leg , unsigned int t_delayms)    // used inside a loop
     last_time = now ;           // to handle continuous increment of millis()
    
     switch (state)             // finite state machine
-                              // finishes one step(state) at each fucntion call and each function call is delayed by t_delayms after the previous one
+                              // finishes one state at each fucntion call and each function call is delayed by t_delayms after the previous one
                               // this is due to the delay control at the beginning of the function😉
     {
         case LEG_STOP:

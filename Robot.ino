@@ -4,13 +4,12 @@ char currentCmd = 0;
 
 void setup()
 {
-   R_leg_setup(9);
-   L_leg_setup(10);
-   ultrsnc_head_setup(7 , 6);
-   robot_init();
-   Serial.begin(115200);
+  R_leg_setup(9);
+  L_leg_setup(10);
+  ultrsnc_head_setup(7 , 6);
+  robot_init();
+  Serial.begin(115200);
 }
-
 void loop() {
   // --- Read command (non-blocking) ---
   if (Serial.available() > 0)   // Check if data is available to read
@@ -51,7 +50,11 @@ void loop() {
       break;
 
     case 'S':
-      robot_init();
+      // Stop command - do nothing
+      break;
+    default:
+      robot_init();  // If no valid command, stop the robot(initialize)
+      currrentCmd = 'S';
       break;
   }
 }

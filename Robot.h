@@ -1,7 +1,7 @@
 #ifndef ROBOT_H
 #define ROBOT_H
-#define RIGHT_LEG 0
-#define LEFT_LEG 1
+#define RIGHT_LEG 1
+#define LEFT_LEG 2
 #define MOVE_R 0
 #define MOVE_L 180
 #define STOP  90
