@@ -19,7 +19,7 @@ void loop() {         // loop function runs over and over again forever
       int in = Serial.read();    // Read the incoming byte
       char cmd = (char) in ;    // Convert the byte to a character
       
-      if (cmd != current_cmd && (cmd == 'F' || cmd == 'L' || cmd == 'R' || cmd == 'S'))  // check for valid commands only
+      if (cmd != current_cmd && (cmd == 'F' || cmd == 'L' || cmd == 'R' || cmd == 'S'))  // check for valid commands only , also the new command must be different from the current one
                                                                  // F -> move forward , L -> rotate left , R -> rotate right , S -> stop
       {
         if(!stopped)
