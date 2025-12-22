@@ -33,7 +33,7 @@ void ultrsnc_head_setup(int echo1 , int trig1)
 
 /***********************Functions of operation*****************************************/ 
 
-void robot_init()                         // robot initialization
+void robot_stop()                         // robot initialization
 {
 
     leg_act(RIGHT_LEG, STOP);
