@@ -6,6 +6,16 @@
 #define MOVE_L 180
 #define STOP  90
 
+enum WalkState {
+  LEFT_STOP=0 , 
+  RIGHT_MOVING , 
+  RIGHT_STOP , 
+  LEFT_MOVING} ; // finite state machine for move_2_steps function
+  
+enum RotateState {
+  LEG_STOP=0 , 
+  LEG_MOVING} ; // finite state machine for rotate_1_step function
+
 /*******************setup functions*********************/
 
 void R_leg_setup(int pin);
@@ -16,7 +26,7 @@ void ultrsnc_head_setup(int echo1 , int trig1);
 void robot_init();             // robot initialization
 float read_distance();        // ultrasonic distance reading
 
-void leg_act(int leg , int servo_state);     // leg = RIGHT_LEG or LEFT_LEG
+void leg_act(int leg , int servo_action);     // leg = RIGHT_LEG or LEFT_LEG
                                              // servo_state = MOVE , STOP or REV
 
 void move_2_steps(unsigned int t_delayms);   /*- t_delayms : delay between steps in milliseconds
