@@ -2,16 +2,16 @@
 #define ROBOT_H
 #define RIGHT_LEG 1
 #define LEFT_LEG 2
-#define MOVE_R 0
-#define MOVE_L 180
-#define STOP  90
+#define MOVE_R 0     // move right leg forward command
+#define MOVE_L 180   // move left leg forward command
+#define STOP  90     // stop specified leg command
 
 enum WalkState {
   LEFT_STOP=0 , 
   RIGHT_MOVING , 
   RIGHT_STOP , 
   LEFT_MOVING} ; // finite state machine for move_2_steps function
-  
+
 enum RotateState {
   LEG_STOP=0 , 
   LEG_MOVING} ; // finite state machine for rotate_1_step function
