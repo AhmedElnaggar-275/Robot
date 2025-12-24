@@ -3,5 +3,5 @@
  The python (objectDetection.py) is credited to my friend.
 
  This code uses state-driven control
- The code is heavily commented carefully by me to ensure solid documentaion of the idea flow
+ The code is heavily commented carefully by to ensure solid documentaion of the idea flow
  Feel free to ask me about any confusing part or suggest modifications in arduino code via email : es-ahmed.elnagar2027@alexu.edu.eg
