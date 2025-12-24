@@ -1,4 +1,4 @@
-#ifndef ROBOT_H
+G6H6#ifndef ROBOT_H
 #define ROBOT_H
 #define RIGHT_LEG 1
 #define LEFT_LEG 2
@@ -27,7 +27,7 @@ void robot_stop();             // robot initialization
 float read_distance();        // ultrasonic distance reading
 
 void leg_act(int leg , int servo_action);     // leg = RIGHT_LEG or LEFT_LEG
-                                             // servo_state = MOVE , STOP or REV
+                                             // servo_state = MOVE or STOP
 
 void move_2_steps(unsigned int t_delayms);   /*- t_delayms : delay between steps in milliseconds
                                                - moving the robot 2 step to be used in loop
