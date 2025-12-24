@@ -23,7 +23,7 @@ void L_leg_setup(int pin);
 void ultrsnc_head_setup(int echo1 , int trig1);
 
 /********************Operation functions*****************/
-void robot_init();             // robot initialization
+void robot_stop();             // robot initialization
 float read_distance();        // ultrasonic distance reading
 
 void leg_act(int leg , int servo_action);     // leg = RIGHT_LEG or LEFT_LEG
