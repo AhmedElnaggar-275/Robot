@@ -1,4 +1,4 @@
-G6H6#ifndef ROBOT_H
+#ifndef ROBOT_H
 #define ROBOT_H
 #define RIGHT_LEG 1
 #define LEFT_LEG 2
@@ -24,26 +24,23 @@ void ultrsnc_head_setup(int echo1 , int trig1);
 
 /********************Operation functions*****************/
 void robot_stop();             // robot initialization
-float read_distance();        // ultrasonic distance reading
-
+float read_distance();   // ultrasonic distance reading
+                         // returns distance in cm , returns -1 if no obstacle detected within range (approximately 40 cm)
 void leg_act(int leg , int servo_action);     // leg = RIGHT_LEG or LEFT_LEG
-                                             // servo_state = MOVE or STOP
+                                             // servo_action = MOVE or STOP
 
-void move_2_steps(unsigned int t_delayms);   /*- t_delayms : delay between steps in milliseconds
-                                               - moving the robot 2 step to be used in loop
-                                                  inorder not to type leg.write(MOVE) and leg.write(STOP) more than once
-                                                  , avoid steps conflict and to standardize delay between steps
-                                                  **after each step the function read_distance() must be called separately to check for obstacles**
-                                                 */
-
-void rotate_1_step(int leg , unsigned int t_delayms); /*leg = RIGHT_LEG or LEFT_LEG
-                                                        - t_delayms : delay between steps in milliseconds
-                                                        - rotating 1 step by moving one leg
-                                                        - it rotates one step at a time and then used in loop
-                                                          where after each step the function read_distance is called to check for obstacles
-                                                        - **the function read_distance is not automatically called inside this function**
-                                                        - **distance_read() must be called separately after each step to check for obstacles**
-                                                          
+void move_2_steps(unsigned int t_motion_delayms , unsigned int t_stop_delayms);   /*- t_motion_delayms : how much time in milliseconds one servo should move
+                                                        - t_stop_delayms : how much time in milliseconds to wait between steps
+                                                        - moving 2 steps forward by moving both legs alternately
+                                                        - it moves one step at a time and then used in loop to continue moving
+                                                        - the delay is non-blocking so other code can run during the stop or motion states
+                                                       */
+void rotate_1_step(int leg , unsigned int t_motion_delayms , unsigned int t_stop_delayms); /*leg = RIGHT_LEG or LEFT_LEG
+                                                        - t_motion_delayms : how much time in milliseconds the servo should move
+                                                        - t_stop_delayms : how much time in milliseconds to wait between steps
+                                                        - rotating by moving one leg at a time
+                                                        - it moves one step at a time and then used in loop to continue rotating
+                                                        - the delay is non-blocking so other code can run during the stop or motion states
                                                        */ 
 
 #endif

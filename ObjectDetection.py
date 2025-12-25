@@ -1,21 +1,27 @@
 #!/usr/bin/env python3  # Allow running this file directly on Linux/macOS (Windows ignores this line)
+# pyright: reportAttributeAccessIssue=false  # OpenCV's dynamic attributes often confuse type-checkers; runtime is fine.
 """  # Module docstring: explains what this script does.
-Face Tracking Robot Controller - FIXED VERSION  # High-level description.
-Stops when no face detected  # Behavior note: sends STOP when face not detected.
+Face Tracking Robot Controller (PC-side)  # High-level description.
 
-NOTE ABOUT THIS REPO:  # Important project-specific note.
-- The Arduino sketch in this repository (Robot.ino / robot.cpp) does not currently parse these serial commands.  # So PC->Arduino commands may do nothing.
-- This Python script is still useful for testing the face detection and command decision logic on the PC.  # You can later update Arduino to read serial.
+This script detects a face in the camera feed, then sends ONE of these single-letter commands over serial:
+- 'F' = face detected and centered enough -> move forward
+- 'L' = face detected and offset left -> turn left
+- 'R' = face detected and offset right -> turn right
+- 'S' = face detected but too close -> stop
+
+Special case:
+- If NO face is detected, it sends 'R' continuously (search by rotating right).
+
+Important:
+- The Arduino side must be programmed to read these characters from Serial and act on them.
+- This script does not send any other commands besides F/L/R/S.
 """  # End of module docstring.
 
 import cv2  # type: ignore  # OpenCV: camera capture, drawing, and face detection (Pylance stubs may be incomplete).
 import serial  # PySerial: used to talk to Arduino over USB serial.
 import time  # Used for delays and timeouts.
-import numpy as np  # NumPy: used to create images (manual control UI).
 from collections import deque  # Deque: fixed-length queue for smoothing face positions.
-import threading  # Unused right now; kept because it existed in original code.
 import sys  # Used for sys.exit when a fatal error occurs.
-import os  # Unused right now; kept because it existed in original code.
 
 
 class FaceTrackingRobot:  # Main class that owns camera, detector, and Arduino link.
@@ -73,9 +79,9 @@ class FaceTrackingRobot:  # Main class that owns camera, detector, and Arduino l
         self.min_face_size = 15000  # Face area threshold: smaller means far away.
         self.max_face_size = 60000  # Face area threshold: larger means too close.
 
-        # Search parameters  # Used if you implement search when no face.
+        # Search parameters  # Bookkeeping only (we always return 'R' when no face).
         self.no_face_counter = 0  # Counts consecutive frames with no detected face.
-        self.search_direction = 'L'  # Default search direction if search is enabled.
+        self.search_direction = 'L'  # Legacy field (currently unused).
         self.last_face_time = time.time()  # Timestamp of last detection.
         self.search_timeout = 2.0  # Seconds without a face before searching.
 
@@ -83,17 +89,16 @@ class FaceTrackingRobot:  # Main class that owns camera, detector, and Arduino l
         self.face_positions = deque(maxlen=5)  # Keep last 5 face measurements.
 
         # Movement control  # State variables.
-        self.movement_enabled = True  # Can be toggled with 's'.
+        self.movement_enabled = True  # Always True in this version (no keyboard toggle).
         self.last_command = None  # Last command sent, used to reduce spam.
         self.command_count = 0  # Counter used to periodically resend command.
 
         print("\n" + "="*50)  # Print a divider line.
-        print("FACE TRACKING ROBOT CONTROLS - FIXED")  # Title.
+        print("FACE TRACKING ROBOT CONTROLS")  # Title.
         print("="*50)  # Another divider.
-        print("When NO FACE detected: Robot STOPS")  # Behavior summary.
+        print("Commands sent: F / L / R / S only")  # Behavior summary.
+        print("When NO FACE detected: sends 'R' (search right)")  # No-face behavior.
         print("Press 'q' to quit")  # Key hint.
-        print("Press 's' to toggle movement on/off")  # Key hint.
-        print("Press 'm' for manual control mode")  # Key hint.
         print("="*50 + "\n")  # Divider and spacing.
 
     def detect_face(self, frame):  # Given a frame, try to find a face.
@@ -172,7 +177,7 @@ class FaceTrackingRobot:  # Main class that owns camera, detector, and Arduino l
             try:  # Serial write might fail.
                 self.arduino.write(command.encode())  # Convert string to bytes and send.
                 return True  # Report success.
-            except Exception as e:  # Handle serial errors.
+            except Exception as e:  # noqa: BLE001  # Handle serial errors (broad except keeps the loop running).
                 print(f"✗ Error sending to Arduino: {e}")  # Print why it failed.
                 return False  # Report failure.
         elif self.simulation_mode:  # In simulation we don't send serial.
@@ -219,8 +224,8 @@ class FaceTrackingRobot:  # Main class that owns camera, detector, and Arduino l
         status_text = "ACTIVE" if self.movement_enabled else "PAUSED"  # Human status.
         cv2.putText(frame, f"Status: {status_text}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, status_color, 2)  # Draw status.
 
-        cmd_names = {'F': 'FORWARD', 'B': 'BACKWARD', 'L': 'LEFT', 'R': 'RIGHT', 'S': 'STOP', 'C': 'CENTER'}  # Display map.
-        cmd_text = cmd_names.get(command, 'SEARCHING')  # Convert command letter to text.
+        cmd_names = {'F': 'FORWARD', 'L': 'LEFT', 'R': 'RIGHT', 'S': 'STOP'}  # Display map (matches allowed commands).
+        cmd_text = cmd_names.get(command, command)  # Convert command letter to text.
         cmd_color = (0, 255, 0) if command == 'S' else (0, 255, 255)  # Color STOP green else yellow.
         cv2.putText(frame, f"Command: {cmd_text}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, cmd_color, 2)  # Draw command.
 
@@ -278,7 +283,7 @@ class FaceTrackingRobot:  # Main class that owns camera, detector, and Arduino l
         print("\nCleaning up...")  # Notify user.
 
         if not self.simulation_mode and self.arduino:  # If we have a real Arduino connection.
-            self.arduino.write(b'S')  # Send stop byte.
+            self.arduino.write(b'S')  # Send a final STOP before closing (safety on exit).
             time.sleep(0.1)  # Give it time.
             self.arduino.close()  # Close serial port.
 
@@ -291,18 +296,8 @@ class FaceTrackingRobot:  # Main class that owns camera, detector, and Arduino l
 
 def find_arduino_port():  # Helper to guess Arduino port.
     """Try to automatically find Arduino port"""  # Docstring.
-    import platform  # Imported inside function to keep global imports unchanged.
-    system = platform.system()  # Get OS name string.
-
-    if system == "Windows":  # Windows uses COM ports.
-        ports = [f"COM{i}" for i in range(1, 10)]  # Try COM1..COM9.
-    elif system == "Linux":  # Common Linux serial device paths.
-        ports = ["/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyACM0", "/dev/ttyACM1"]  # Candidate ports.
-    elif system == "Darwin":  # macOS.
-        ports = ["/dev/tty.usbmodem", "/dev/tty.usbserial"]  # Candidate prefixes.
-    else:  # Unknown OS.
-        ports = []  # No guesses.
-
+    # Detect common Arduino ports on Windows
+    ports = [f"COM{i}" for i in range(1, 10)]  # Try COM1..COM9.
     for port in ports:  # Try each candidate.
         try:  # Opening might fail.
             ser = serial.Serial(port, 115200, timeout=1)  # Attempt to open.
@@ -317,8 +312,9 @@ def find_arduino_port():  # Helper to guess Arduino port.
 def main():  # Script entry point.
     """Main function"""  # Docstring.
     print("="*60)  # Divider.
-    print("FACE TRACKING ROBOT - FIXED VERSION")  # Title.
-    print("Robot STOPS when no face detected")  # Behavior reminder.
+    print("FACE TRACKING ROBOT")  # Title.
+    print("Sends only: F / L / R / S")  # Behavior reminder.
+    print("No face: sends 'R' (search right)")  # Behavior reminder.
     print("="*60)  # Divider.
 
     arduino_port = find_arduino_port()  # Try to auto-detect Arduino port.
