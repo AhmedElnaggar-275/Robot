@@ -48,17 +48,26 @@ void loop() {         // loop function runs over and over again forever
   {
     case 'F':      // current command is Move Forward
       move_2_steps(500 , 250);      // move forward with 500 ms delay operating each servo and 250 ms delay stop between steps
-      stopped = false;        // update stopped state
+      if(stopped)     // note that it doesn't execute this unless stopped = true (just for clarity)
+      {
+        stopped = false;        // update stopped state if not updated
+      }
       break;
 
     case 'L':     // current command is Rotate Left
       rotate_1_step(RIGHT_LEG, 500 , 250);   // rotate left by moving right leg with 500 ms delay operating the servo and 250 ms delay stop
-      stopped = false;
+      if(stopped)
+      {
+        stopped = false;        // update stopped state if not updated
+      }
       break;
 
     case 'R':     // current command is Rotate Right
       rotate_1_step(LEFT_LEG, 500 , 250);   // rotate right by moving left leg with 500 ms delay operating the servo and 250 ms delay stop
-      stopped = false;
+      if(stopped)
+      {
+        stopped = false;        // update stopped state if not updated
+      }
       break;
 
     case 'S':     // current command is Stop
