@@ -38,7 +38,7 @@ void loop() {         // loop function runs over and over again forever
   // --- Obstacle detection ---
   float distance = read_distance();
 
-  if (distance > 0 && distance <= 20)   // Obstacle detected within 20 cm
+  if (distance > 0 && distance <= 15)   // Obstacle detected within 15 cm
   {
     current_cmd = 'S';   // force STOP ->> because it writes on the current_cmd variable after it was read from Serial
   }
