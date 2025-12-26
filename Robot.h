@@ -10,11 +10,11 @@ enum WalkState {
   LEFT_STOP=0 , 
   RIGHT_MOVING , 
   RIGHT_STOP , 
-  LEFT_MOVING } ; // finite state machine for move_2_steps function
+  LEFT_MOVING } ; // finite state machine for move function
 
 enum RotateState {
   LEG_STOP=0 , 
-  LEG_MOVING } ; // finite state machine for rotate_1_step function
+  LEG_MOVING } ; // finite state machine for rotate function
 
 /*******************setup functions*********************/
 
