@@ -7,7 +7,7 @@ void setup()
 {
   R_leg_setup(9);     // right leg pin 9
   L_leg_setup(10);    // left leg pin 10
-  ultrsnc_head_setup(7 , 6);  // echo pin 7 , trig pin 6
+  ultrsnc_head_setup(12 , 11);  // echo pin 12 , trig pin 11
   robot_stop();               // initialize robot to stopped state
   stopped = true;
   Serial.begin(115200);       // start serial communication at 115200 rate to receive commands from serial monitor
@@ -47,15 +47,15 @@ void loop() {         // loop function runs over and over again forever
   switch (current_cmd)
   {
     case 'F':      // current command is Move Forward
-      move_2_steps(500 , 250);      // move forward with 500 ms delay operating each servo and 250 ms delay stop between steps
-      if(stopped)     // note that it doesn't execute this unless stopped = true (just for clarity)
+      move(500 , 250);      // move forward with 500 ms delay operating each servo and 250 ms delay stop between steps
+      if(stopped == true)     // note that it doesn't execute this unless stopped = true (just for clarity)
       {
         stopped = false;        // update stopped state if not updated
       }
       break;
 
     case 'L':     // current command is Rotate Left
-      rotate_1_step(RIGHT_LEG, 500 , 250);   // rotate left by moving right leg with 500 ms delay operating the servo and 250 ms delay stop
+      rotate(RIGHT_LEG, 500 , 250);   // rotate left by moving right leg with 500 ms delay operating the servo and 250 ms delay stop
       if(stopped)
       {
         stopped = false;        // update stopped state if not updated
@@ -63,7 +63,7 @@ void loop() {         // loop function runs over and over again forever
       break;
 
     case 'R':     // current command is Rotate Right
-      rotate_1_step(LEFT_LEG, 500 , 250);   // rotate right by moving left leg with 500 ms delay operating the servo and 250 ms delay stop
+      rotate(LEFT_LEG, 500 , 250);   // rotate right by moving left leg with 500 ms delay operating the servo and 250 ms delay stop
       if(stopped)
       {
         stopped = false;        // update stopped state if not updated

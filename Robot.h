@@ -29,17 +29,17 @@ float read_distance();   // ultrasonic distance reading
 void leg_act(int leg , int servo_action);     // leg = RIGHT_LEG or LEFT_LEG
                                              // servo_action = MOVE or STOP
 
-void move_2_steps(unsigned int t_motion_delayms , unsigned int t_stop_delayms);   /*- t_motion_delayms : how much time in milliseconds one servo should move
+void move(unsigned int t_motion_delayms , unsigned int t_stop_delayms);   /*- t_motion_delayms : how much time in milliseconds one servo should move
                                                         - t_stop_delayms : how much time in milliseconds to wait between steps
-                                                        - moving 2 steps forward by moving both legs alternately
-                                                        - it moves one step at a time and then used in loop to continue moving
+                                                        - moving forward by moving both legs alternately
+                                                        - it moves one step at a time and used in loop to continue states
                                                         - the delay is non-blocking so other code can run during the stop or motion states
                                                        */
-void rotate_1_step(int leg , unsigned int t_motion_delayms , unsigned int t_stop_delayms); /*leg = RIGHT_LEG or LEFT_LEG
+void rotate(int leg , unsigned int t_motion_delayms , unsigned int t_stop_delayms); /*leg = RIGHT_LEG or LEFT_LEG
                                                         - t_motion_delayms : how much time in milliseconds the servo should move
                                                         - t_stop_delayms : how much time in milliseconds to wait between steps
                                                         - rotating by moving one leg at a time
-                                                        - it moves one step at a time and then used in loop to continue rotating
+                                                        - it moves one step at a time and then used in loop to continue states
                                                         - the delay is non-blocking so other code can run during the stop or motion states
                                                        */ 
 

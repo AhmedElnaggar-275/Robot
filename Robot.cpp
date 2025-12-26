@@ -82,12 +82,13 @@ void leg_act(int leg , int servo_action)      // leg action function instead of 
     }
 }
 
-void move_2_steps(unsigned int t_motion_delayms , unsigned int t_stop_delayms)        // used inside a loop
+void move(unsigned int t_motion_delayms , unsigned int t_stop_delayms)        // used inside a loop
 {   
     static WalkState state = LEFT_STOP ;   // static variable to hold the current state without reseting it on each function call
                                           // defining it every call won't take time but it is just best parctice for readability and debugging
 
     static unsigned long last_time = 0;   // static to hold its value without reseting it on each function call
+    
     unsigned long now = millis();        //returns the time elapsed since the program started (milliseconds time)
                                          //it is a 32 bit number that overflows after approximately 49.71 days
                                          //overflow returns it to zero again
@@ -132,7 +133,7 @@ void move_2_steps(unsigned int t_motion_delayms , unsigned int t_stop_delayms)  
             break;
     }
 }
-void rotate_1_step(int leg , unsigned int t_motion_delayms , unsigned int t_stop_delayms)    // used inside a loop
+void rotate(int leg , unsigned int t_motion_delayms , unsigned int t_stop_delayms)    // used inside a loop
 {
     static RotateState state = LEG_STOP ;   // static variable to hold the current state without reseting it on each function call
     static unsigned long last_time = 0;
