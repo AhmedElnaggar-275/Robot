@@ -43,7 +43,7 @@ void loop() {         // loop function runs over and over again forever
     current_cmd = 'S';   // force STOP ->> because it writes on the current_cmd variable after it was read from Serial
   }
 
-  // --- Execute ONE STEP per loop ---
+  // --- loop ---
   switch (current_cmd)
   {
     case 'F':      // current command is Move Forward
