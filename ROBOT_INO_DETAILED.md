@@ -288,6 +288,109 @@ flowchart TD
 
 ## 3) Control Flow & State Machine
 
+### Complete Finite State Machine
+
+The Robot.ino system can be modeled as a finite state machine with the following states and transitions:
+
+```mermaid
+stateDiagram-v2
+  [*] --> INIT: Power On
+
+  INIT --> STOPPED: setup() completes
+
+  STOPPED --> MOVING_FORWARD: Serial 'F' received
+  STOPPED --> MOVING_LEFT: Serial 'L' received
+  STOPPED --> MOVING_RIGHT: Serial 'R' received
+  STOPPED --> STOPPED: Serial 'S' received
+
+  MOVING_FORWARD --> STOPPED: New command<br/>(robot_stop)
+  MOVING_FORWARD --> STOPPED: Obstacle<br/>(distance ≤ 15cm)
+  MOVING_FORWARD --> MOVING_FORWARD: Continue<br/>move(500,250)
+
+  MOVING_LEFT --> STOPPED: New command<br/>(robot_stop)
+  MOVING_LEFT --> STOPPED: Obstacle<br/>(distance ≤ 15cm)
+  MOVING_LEFT --> MOVING_LEFT: Continue<br/>rotate(RIGHT_LEG,500,250)
+
+  MOVING_RIGHT --> STOPPED: New command<br/>(robot_stop)
+  MOVING_RIGHT --> STOPPED: Obstacle<br/>(distance ≤ 15cm)
+  MOVING_RIGHT --> MOVING_RIGHT: Continue<br/>rotate(LEFT_LEG,500,250)
+
+  STOPPED --> MOVING_FORWARD: Serial 'F'
+  STOPPED --> MOVING_LEFT: Serial 'L'
+  STOPPED --> MOVING_RIGHT: Serial 'R'
+
+  note right of INIT
+    Setup phase:
+    - Attach servos
+    - Init ultrasonic
+    - Serial begin
+    - robot_stop()
+  end note
+
+  note right of STOPPED
+    State variables:
+    - stopped = true
+    - current_cmd = 'S' or 0
+    Both legs at 90°
+  end note
+
+  note right of MOVING_FORWARD
+    State variables:
+    - stopped = false
+    - current_cmd = 'F'
+    Alternating leg motion
+  end note
+
+  note right of MOVING_LEFT
+    State variables:
+    - stopped = false
+    - current_cmd = 'L'
+    Right leg moving
+  end note
+
+  note right of MOVING_RIGHT
+    State variables:
+    - stopped = false
+    - current_cmd = 'R'
+    Left leg moving
+  end note
+```
+
+### State Definitions
+
+| State | `current_cmd` | `stopped` | Servo Action |
+|---|---|---|---|
+| **INIT** | `0` | `true` | Initializing hardware |
+| **STOPPED** | `'S'` or `0` | `true` | Both legs at 90° |
+| **MOVING_FORWARD** | `'F'` | `false` | `move(500, 250)` alternates legs |
+| **MOVING_LEFT** | `'L'` | `false` | `rotate(RIGHT_LEG, 500, 250)` |
+| **MOVING_RIGHT** | `'R'` | `false` | `rotate(LEFT_LEG, 500, 250)` |
+
+### Transition Conditions
+
+#### Entering States
+
+**→ STOPPED:**
+- From INIT: After `setup()` completes
+- From any MOVING state:
+  - New serial command received (different from current)
+  - Obstacle detected (distance ≤ 15 cm)
+  - Serial 'S' command received
+
+**→ MOVING_FORWARD:**
+- From STOPPED: Serial 'F' received
+
+**→ MOVING_LEFT:**
+- From STOPPED: Serial 'L' received
+
+**→ MOVING_RIGHT:**
+- From STOPPED: Serial 'R' received
+
+#### Transition Priority (High → Low)
+1. **Obstacle Detection** (distance ≤ 15 cm) → Forces `STOPPED` state
+2. **New Serial Command** (different from current) → Transition via `STOPPED`
+3. **Continue Current Command** → Stay in current state
+
 ### Command Hierarchy
 ```
 Serial Input (from PC)
@@ -301,20 +404,56 @@ Obstacle Detection
 Execute current_cmd
 ```
 
-### Robot States
+### Robot States (Physical)
 - **STOPPED:** Legs are at rest (90°)
-- **MOVING:** One leg is in motion (0° or 180°)
+- **MOVING:** One or both legs in motion (0° or 180°)
 
 ### Transition Rules
 ```
-STOPPED + Serial 'F' → Start move() → MOVING
-STOPPED + Serial 'L' → Start rotate(RIGHT_LEG) → MOVING
-STOPPED + Serial 'R' → Start rotate(LEFT_LEG) → MOVING
+STOPPED + Serial 'F' → Start move() → MOVING_FORWARD
+STOPPED + Serial 'L' → Start rotate(RIGHT_LEG) → MOVING_LEFT
+STOPPED + Serial 'R' → Start rotate(LEFT_LEG) → MOVING_RIGHT
 STOPPED + Serial 'S' → Stay STOPPED
 
-MOVING + New command → Call robot_stop() first → STOPPED → Execute new
+MOVING_* + New command → Call robot_stop() first → STOPPED → Execute new
 
-MOVING + Obstacle detected → Call robot_stop() → STOPPED
+MOVING_* + Obstacle detected → Call robot_stop() → STOPPED
+```
+
+### State Transition Examples
+
+**Example 1: Forward → Left Turn**
+```
+State: MOVING_FORWARD (current_cmd='F', stopped=false)
+    ↓ Serial receives 'L'
+    ↓ (cmd != current_cmd) → robot_stop()
+State: STOPPED (current_cmd='L', stopped=true)
+    ↓ Next loop iteration
+    ↓ switch(current_cmd) → case 'L'
+State: MOVING_LEFT (current_cmd='L', stopped=false)
+```
+
+**Example 2: Moving → Obstacle Detected**
+```
+State: MOVING_FORWARD (current_cmd='F', stopped=false)
+    ↓ read_distance() returns 12 cm
+    ↓ (distance ≤ 15) → current_cmd = 'S'
+State: (transitioning) (current_cmd='S', stopped=false)
+    ↓ switch(current_cmd) → case 'S'
+    ↓ robot_stop() called
+State: STOPPED (current_cmd='S', stopped=true)
+```
+
+**Example 3: Idle → Forward**
+```
+State: STOPPED (current_cmd=0, stopped=true)
+    ↓ Serial receives 'F'
+    ↓ (cmd != current_cmd) → current_cmd = 'F'
+State: STOPPED (current_cmd='F', stopped=true)
+    ↓ Next loop iteration
+    ↓ switch(current_cmd) → case 'F'
+    ↓ move(500, 250) called
+State: MOVING_FORWARD (current_cmd='F', stopped=false)
 ```
 
 ---

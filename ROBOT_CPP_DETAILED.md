@@ -282,13 +282,92 @@ last_time = now;  // Reset timer
 // ... execute next state ...
 ```
 
-**Diagram – Forward Walk State Machine:**
+**Diagram – Forward Walk State Machine (Complete FSM):**
+```mermaid
+stateDiagram-v2
+  [*] --> LEFT_STOP: Function called<br/>first time
+
+  state LEFT_STOP {
+    [*] --> CheckTime_LS
+    CheckTime_LS --> WaitMore_LS: (now - last_time)<br/>< t_stop_delayms
+    WaitMore_LS --> [*]: return early
+    CheckTime_LS --> Execute_LS: Enough time<br/>has passed
+    Execute_LS --> UpdateTime: last_time = now
+    UpdateTime --> MoveRightLeg: leg_act(RIGHT_LEG, MOVE_R)<br/>Right leg → 0°
+    MoveRightLeg --> SetState_RM: state = RIGHT_MOVING
+    SetState_RM --> [*]: Exit function
+  }
+
+  state RIGHT_MOVING {
+    [*] --> CheckTime_RM
+    CheckTime_RM --> WaitMore_RM: (now - last_time)<br/>< t_motion_delayms
+    WaitMore_RM --> [*]: return early
+    CheckTime_RM --> Execute_RM: Enough time<br/>has passed
+    Execute_RM --> UpdateTime_RM: last_time = now
+    UpdateTime_RM --> StopRightLeg: leg_act(RIGHT_LEG, STOP)<br/>Right leg → 90°
+    StopRightLeg --> SetState_RS: state = RIGHT_STOP
+    SetState_RS --> [*]: Exit function
+  }
+
+  state RIGHT_STOP {
+    [*] --> CheckTime_RS
+    CheckTime_RS --> WaitMore_RS: (now - last_time)<br/>< t_stop_delayms
+    WaitMore_RS --> [*]: return early
+    CheckTime_RS --> Execute_RS: Enough time<br/>has passed
+    Execute_RS --> UpdateTime_RS: last_time = now
+    UpdateTime_RS --> MoveLeftLeg: leg_act(LEFT_LEG, MOVE_L)<br/>Left leg → 180°
+    MoveLeftLeg --> SetState_LM: state = LEFT_MOVING
+    SetState_LM --> [*]: Exit function
+  }
+
+  state LEFT_MOVING {
+    [*] --> CheckTime_LM
+    CheckTime_LM --> WaitMore_LM: (now - last_time)<br/>< t_motion_delayms
+    WaitMore_LM --> [*]: return early
+    CheckTime_LM --> Execute_LM: Enough time<br/>has passed
+    Execute_LM --> UpdateTime_LM: last_time = now
+    UpdateTime_LM --> StopLeftLeg: leg_act(LEFT_LEG, STOP)<br/>Left leg → 90°
+    StopLeftLeg --> SetState_LS: state = LEFT_STOP
+    SetState_LS --> [*]: Exit function
+  }
+
+  LEFT_STOP --> RIGHT_MOVING: State transition<br/>(on next call)
+  RIGHT_MOVING --> RIGHT_STOP: State transition<br/>(on next call)
+  RIGHT_STOP --> LEFT_MOVING: State transition<br/>(on next call)
+  LEFT_MOVING --> LEFT_STOP: State transition<br/>(on next call)
+
+  note right of LEFT_STOP
+    PAUSE state
+    Wait t_stop_delayms (250ms)
+    Then move right leg forward
+  end note
+
+  note right of RIGHT_MOVING
+    MOTION state
+    Wait t_motion_delayms (500ms)
+    Right leg is moving to position
+  end note
+
+  note right of RIGHT_STOP
+    PAUSE state
+    Wait t_stop_delayms (250ms)
+    Then move left leg forward
+  end note
+
+  note right of LEFT_MOVING
+    MOTION state
+    Wait t_motion_delayms (500ms)
+    Left leg is moving to position
+  end note
+```
+
+**Simplified State Transitions:**
 ```mermaid
 stateDiagram-v2
   [*] --> LEFT_STOP
   
   LEFT_STOP --> LEFT_STOP: time < 250ms?<br/>return
-  LEFT_STOP --> RIGHT_MOVING: 250ms passed
+  LEFT_STOP --> RIGHT_MOVING: 250ms passed<br/>right leg → 0°
   
   RIGHT_MOVING --> RIGHT_MOVING: time < 500ms?<br/>return
   RIGHT_MOVING --> RIGHT_STOP: 500ms passed<br/>right leg → 90°
@@ -298,28 +377,6 @@ stateDiagram-v2
   
   LEFT_MOVING --> LEFT_MOVING: time < 500ms?<br/>return
   LEFT_MOVING --> LEFT_STOP: 500ms passed<br/>left leg → 90°
-
-  LEFT_STOP --> [*]
-
-  note right of LEFT_STOP
-    Move right leg (0°)
-    Delay: 250ms
-  end note
-
-  note right of RIGHT_MOVING
-    Keep moving
-    Duration: 500ms
-  end note
-
-  note right of RIGHT_STOP
-    Stop right leg (90°)
-    Delay: 250ms
-  end note
-
-  note right of LEFT_MOVING
-    Keep moving
-    Duration: 500ms
-  end note
 ```
 
 **Timing Diagram (500ms motion, 250ms stop):**
@@ -376,7 +433,59 @@ move(500, 250);  // Call this every iteration while 'F' command is active
 - If `leg == RIGHT_LEG`: moves right leg, left leg stays at 90° → rotates left
 - If `leg == LEFT_LEG`: moves left leg, right leg stays at 90° → rotates right
 
-**State Diagram:**
+**State Diagram (Complete FSM):**
+```mermaid
+stateDiagram-v2
+  [*] --> LEG_STOP: Function called<br/>first time
+
+  state LEG_STOP {
+    [*] --> CheckTime_Stop
+    CheckTime_Stop --> WaitMore_Stop: (now - last_time)<br/>< t_stop_delayms
+    WaitMore_Stop --> [*]: return early
+    CheckTime_Stop --> Execute_Stop: Enough time<br/>has passed
+    Execute_Stop --> UpdateTime_Stop: last_time = now
+    UpdateTime_Stop --> DetermineLeg: Which leg?
+    DetermineLeg --> MoveRightLeg: leg == RIGHT_LEG
+    DetermineLeg --> MoveLeftLeg: leg == LEFT_LEG
+    MoveRightLeg --> MoveLeg: leg_act(leg, MOVE_R)<br/>Right leg → 0°
+    MoveLeftLeg --> MoveLeg: leg_act(leg, MOVE_L)<br/>Left leg → 180°
+    MoveLeg --> SetState_Moving: state = LEG_MOVING
+    SetState_Moving --> [*]: Exit function
+  }
+
+  state LEG_MOVING {
+    [*] --> CheckTime_Moving
+    CheckTime_Moving --> WaitMore_Moving: (now - last_time)<br/>< t_motion_delayms
+    WaitMore_Moving --> [*]: return early
+    CheckTime_Moving --> Execute_Moving: Enough time<br/>has passed
+    Execute_Moving --> UpdateTime_Moving: last_time = now
+    UpdateTime_Moving --> StopLeg: leg_act(leg, STOP)<br/>Leg → 90°
+    StopLeg --> SetState_Stop: state = LEG_STOP
+    SetState_Stop --> [*]: Exit function
+  }
+
+  LEG_STOP --> LEG_MOVING: State transition<br/>(on next call)
+  LEG_MOVING --> LEG_STOP: State transition<br/>(on next call)
+
+  note right of LEG_STOP
+    PAUSE state
+    Wait t_stop_delayms (250ms)
+    Then move specified leg
+    
+    Rotation direction:
+    - RIGHT_LEG moves → rotate LEFT
+    - LEFT_LEG moves → rotate RIGHT
+  end note
+
+  note right of LEG_MOVING
+    MOTION state
+    Wait t_motion_delayms (500ms)
+    Leg is moving to position
+    Other leg stays at 90° (fixed)
+  end note
+```
+
+**Simplified State Transitions:**
 ```mermaid
 stateDiagram-v2
   [*] --> LEG_STOP
@@ -386,18 +495,6 @@ stateDiagram-v2
   
   LEG_MOVING --> LEG_MOVING: time < 500ms?<br/>return
   LEG_MOVING --> LEG_STOP: 500ms passed<br/>Stop leg (90°)
-
-  LEG_STOP --> [*]
-
-  note right of LEG_STOP
-    Move leg in direction
-    Delay: 250ms
-  end note
-
-  note right of LEG_MOVING
-    Keep moving
-    Duration: 500ms
-  end note
 ```
 
 **Rotation Timing (500ms motion, 250ms stop):**
@@ -466,6 +563,81 @@ last_time = now;  // Update timer
 ---
 
 ## 7) Diagrams
+
+### Complete System FSM Overview
+
+This diagram shows how the entire robot control system works together:
+
+```mermaid
+stateDiagram-v2
+  [*] --> INIT: Power On
+
+  INIT --> IDLE: setup() complete<br/>Servos initialized<br/>Ultrasonic ready<br/>Serial open
+
+  IDLE --> WALK_FSM: loop() receives 'F'
+  IDLE --> ROTATE_LEFT_FSM: loop() receives 'L'
+  IDLE --> ROTATE_RIGHT_FSM: loop() receives 'R'
+  IDLE --> IDLE: loop() receives 'S'
+
+  state WALK_FSM {
+    [*] --> W_LEFT_STOP
+    W_LEFT_STOP --> W_RIGHT_MOVING: 250ms elapsed<br/>right leg → 0°
+    W_RIGHT_MOVING --> W_RIGHT_STOP: 500ms elapsed<br/>right leg → 90°
+    W_RIGHT_STOP --> W_LEFT_MOVING: 250ms elapsed<br/>left leg → 180°
+    W_LEFT_MOVING --> W_LEFT_STOP: 500ms elapsed<br/>left leg → 90°
+    
+    note right of W_LEFT_STOP
+      4-state cycle
+      Total: 1500ms per cycle
+      Robot moves forward
+    end note
+  }
+
+  state ROTATE_LEFT_FSM {
+    [*] --> RL_LEG_STOP
+    RL_LEG_STOP --> RL_LEG_MOVING: 250ms elapsed<br/>right leg → 0°<br/>left leg fixed at 90°
+    RL_LEG_MOVING --> RL_LEG_STOP: 500ms elapsed<br/>right leg → 90°
+    
+    note right of RL_LEG_STOP
+      2-state cycle
+      Total: 750ms per cycle
+      Robot rotates left
+    end note
+  }
+
+  state ROTATE_RIGHT_FSM {
+    [*] --> RR_LEG_STOP
+    RR_LEG_STOP --> RR_LEG_MOVING: 250ms elapsed<br/>left leg → 180°<br/>right leg fixed at 90°
+    RR_LEG_MOVING --> RR_LEG_STOP: 500ms elapsed<br/>left leg → 90°
+    
+    note right of RR_LEG_STOP
+      2-state cycle
+      Total: 750ms per cycle
+      Robot rotates right
+    end note
+  }
+
+  WALK_FSM --> IDLE: New command<br/>or obstacle
+  ROTATE_LEFT_FSM --> IDLE: New command<br/>or obstacle
+  ROTATE_RIGHT_FSM --> IDLE: New command<br/>or obstacle
+
+  note left of INIT
+    Hardware setup:
+    - Attach leg1 (pin 9)
+    - Attach leg2 (pin 10)
+    - Setup ultrasonic
+    - Serial.begin(115200)
+    - robot_stop()
+  end note
+
+  note right of IDLE
+    Waiting state:
+    - Both legs at 90°
+    - stopped = true
+    - Monitoring serial
+    - Checking obstacles
+  end note
+```
 
 ### Servo Angle Reference
 ```
