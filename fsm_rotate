@@ -1,0 +1,16 @@
+// Rotate Function FSM
+digraph rotate_fsm {
+	rankdir=LR
+	START [label=Start color=black fontcolor=white shape=circle style=filled]
+	STOP [label="LEG_STOP
+(Pause 250ms)" shape=box]
+	MOVING [label="LEG_MOVING
+(Motion 500ms)" shape=box]
+	START -> STOP [label="First Call"]
+	STOP -> STOP [label="Wait < 250ms"]
+	STOP -> MOVING [label="Time >= 250ms
+Move Leg (L or R)"]
+	MOVING -> MOVING [label="Wait < 500ms"]
+	MOVING -> STOP [label="Time >= 500ms
+Stop Leg"]
+}

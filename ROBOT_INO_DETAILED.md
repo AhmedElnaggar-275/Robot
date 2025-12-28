@@ -578,6 +578,11 @@ TIME    EVENT                               RESULT
 ...     (continue)
 ```
 
+## 6) Visual Diagrams
+
+### Arduino Main Loop Flowchart
+![Arduino Loop FSM](fsm_arduino_loop.png)
+
 ---
 
 ## Summary

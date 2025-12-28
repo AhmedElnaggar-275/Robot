@@ -618,3 +618,17 @@ Note: move() and rotate() return early on most calls
 | Loop iteration | ~2.5ms | 1 iteration |
 | Obstacle check | ~2.3ms max | Single call |
 
+---
+
+## 6. Visual Diagrams (Generated Images)
+
+### Arduino Main Loop
+![Arduino Loop FSM](fsm_arduino_loop.png)
+
+### Move Function FSM
+![Move Function FSM](fsm_move.png)
+
+### Rotate Function FSM
+![Rotate Function FSM](fsm_rotate.png)
+
+

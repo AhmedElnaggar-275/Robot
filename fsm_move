@@ -1,0 +1,26 @@
+// Move Function FSM
+digraph move_fsm {
+	rankdir=LR
+	START [label=Start color=black fontcolor=white shape=circle style=filled]
+	LS [label="LEFT_STOP
+(Pause 250ms)" shape=box]
+	RM [label="RIGHT_MOVING
+(Motion 500ms)" shape=box]
+	RS [label="RIGHT_STOP
+(Pause 250ms)" shape=box]
+	LM [label="LEFT_MOVING
+(Motion 500ms)" shape=box]
+	START -> LS [label="First Call"]
+	LS -> LS [label="Wait < 250ms"]
+	LS -> RM [label="Time >= 250ms
+Move Right Leg"]
+	RM -> RM [label="Wait < 500ms"]
+	RM -> RS [label="Time >= 500ms
+Stop Right Leg"]
+	RS -> RS [label="Wait < 250ms"]
+	RS -> LM [label="Time >= 250ms
+Move Left Leg"]
+	LM -> LM [label="Wait < 500ms"]
+	LM -> LS [label="Time >= 500ms
+Stop Left Leg"]
+}

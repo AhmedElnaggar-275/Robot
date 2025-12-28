@@ -1,0 +1,24 @@
+// Arduino Loop FSM
+digraph arduino_loop_fsm {
+	rankdir=TB
+	LOOP [label="Loop Start" shape=oval]
+	SERIAL [label="Read Serial" shape=diamond]
+	DIST [label="Read Distance" shape=diamond]
+	EXEC [label="Execute Command" shape=box]
+	CMD_F [label="Move Forward" shape=box]
+	CMD_L [label="Rotate Left" shape=box]
+	CMD_R [label="Rotate Right" shape=box]
+	CMD_S [label=Stop shape=box]
+	LOOP -> SERIAL
+	SERIAL -> DIST [label="Update cmd if available"]
+	DIST -> EXEC [label="Check Obstacle"]
+	DIST -> EXEC [label="Force Stop if < 15cm" color=red]
+	EXEC -> CMD_F [label="cmd='F'"]
+	EXEC -> CMD_L [label="cmd='L'"]
+	EXEC -> CMD_R [label="cmd='R'"]
+	EXEC -> CMD_S [label="cmd='S'"]
+	CMD_F -> LOOP [label="Next Iteration"]
+	CMD_L -> LOOP
+	CMD_R -> LOOP
+	CMD_S -> LOOP
+}

@@ -9,6 +9,8 @@
 
 This file is compiled with `Robot.h` and included in `Robot.ino`.
 
+![Robot.cpp Mind Map](robot_cpp_mindmap.png)
+
 ---
 
 ## Table of Contents
@@ -702,6 +704,16 @@ Servo Legs
 ├─ Servo 2 (Left)  ──→ Pin 10
 └─ Both: GND to common, 5V to power (external recommended)
 ```
+
+## 8) Visual FSM Diagrams
+
+Here are the visual representations of the Finite State Machines for the movement functions.
+
+### Move Function FSM
+![Move Function FSM](fsm_move.png)
+
+### Rotate Function FSM
+![Rotate Function FSM](fsm_rotate.png)
 
 ---
 
